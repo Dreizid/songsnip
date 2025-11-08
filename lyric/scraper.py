@@ -39,7 +39,6 @@ def fetch_lyrics(url: str):
             lyrics += "\n"
             continue
         for content in lyric.contents:
-            print(content, type(content))
             assert isinstance(content, (NavigableString, Tag))
             if content.name == "br":
                 lyrics += "\n"
@@ -48,12 +47,3 @@ def fetch_lyrics(url: str):
             elif content.get("data-exclude-from-selection") != "true":
                 lyrics += content.get_text(separator="\n")
     return lyrics
-
-
-def main():
-    songs = fetch_songs("let it")
-    lyrics = fetch_lyrics(songs[7]["url"])
-    print(lyrics)
-
-
-main()
