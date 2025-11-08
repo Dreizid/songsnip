@@ -1,4 +1,3 @@
-import json
 import os
 import re
 
@@ -26,7 +25,7 @@ def fetch_songs(query: str):
     header = {"Authorization": f"Bearer {os.getenv('GENIUS_API_KEY')}"}
     params = {"q": query}
     response = requests.get(url=base_url, headers=header, params=params)
-    response_dict = json.loads(response.text)
+    response_dict = response.json()
     songs = [
         {"title": song["result"]["full_title"], "url": song["result"]["url"]}
         for song in response_dict["response"]["hits"]
