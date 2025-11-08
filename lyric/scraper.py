@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 ALLOWED_DOMAINS = ["genius.com"]
+TIMEOUT_SECONDS = 20
 
 
 def fetch_songs(query: str):
@@ -27,7 +28,9 @@ def fetch_songs(query: str):
     base_url = "https://api.genius.com/search"
     header = {"Authorization": f"Bearer {os.getenv('GENIUS_API_KEY')}"}
     params = {"q": query}
-    response = requests.get(url=base_url, headers=header, params=params)
+    response = requests.get(
+        url=base_url, headers=header, params=params, timeout=TIMEOUT_SECONDS
+    )
     response_dict = response.json()
     songs = [
         {"title": song["result"]["full_title"], "url": song["result"]["url"]}
@@ -48,7 +51,7 @@ def fetch_lyrics(url: str):
     """
     if not is_allowed_url(url):
         raise ValueError("URL is not from a trusted source")
-    response = requests.get(url)
+    response = requests.get(url, timeout=TIMEOUT_SECONDS)
     results = response.text
     soup = bs4.BeautifulSoup(results, "html.parser")
     headers = soup.find_all("div", class_=re.compile("LyricsHeader"))
