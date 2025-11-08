@@ -11,6 +11,17 @@ load_dotenv()
 
 
 def fetch_songs(query: str):
+    """ "
+    Fetches songs from genius.com based on the query.
+
+    Parameters:
+        query (str): The title of the song to search for.
+
+    Returns:
+        list of dict: A list of songs that match the query. Each dictionary contains:
+            - 'title' (str): The title of the song.
+            - 'url' (str): The URL for the song lyrics.
+    """
     base_url = "https://api.genius.com/search"
     header = {"Authorization": f"Bearer {os.getenv('GENIUS_API_KEY')}"}
     params = {"q": query}
@@ -24,6 +35,15 @@ def fetch_songs(query: str):
 
 
 def fetch_lyrics(url: str):
+    """
+    Fetches and parses the lyrics of a song.
+
+    Parameters:
+        url (str): The URL of the song to scrape.
+
+    Returns:
+        str: The lyrics of the song.
+    """
     response = requests.get(url)
     results = response.text
     soup = bs4.BeautifulSoup(results, "html.parser")
