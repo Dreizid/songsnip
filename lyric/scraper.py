@@ -61,6 +61,9 @@ def fetch_lyrics(url: str):
 
     lyrics = []
     lyric_container = soup.find_all("div", attrs={"data-lyrics-container": "true"})
+    if not lyric_container:
+        print(f"Lyrics was not found in {url}")
+        return None
     for lyric in lyric_container:
         if not lyric.contents:
             lyrics.append("\n")
