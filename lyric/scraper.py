@@ -58,7 +58,8 @@ def fetch_lyrics(url: str):
             lyrics += "\n"
             continue
         for content in lyric.contents:
-            assert isinstance(content, (NavigableString, Tag))
+            if not isinstance(content, (NavigableString, Tag)):
+                raise TypeError("HTML Error")
             if content.name == "br":
                 lyrics += "\n"
             elif isinstance(content, NavigableString):
