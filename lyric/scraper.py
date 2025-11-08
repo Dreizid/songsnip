@@ -1,5 +1,6 @@
 import os
 import re
+from urllib.parse import urlparse
 
 import bs4
 import requests
@@ -7,6 +8,8 @@ from bs4.element import NavigableString, Tag
 from dotenv import load_dotenv
 
 load_dotenv()
+
+ALLOWED_DOMAINS = ["genius.com"]
 
 
 def fetch_songs(query: str):
@@ -43,6 +46,8 @@ def fetch_lyrics(url: str):
     Returns:
         str: The lyrics of the song.
     """
+    if not is_allowed_url(url):
+        raise ValueError("URL is not from a trusted source")
     response = requests.get(url)
     results = response.text
     soup = bs4.BeautifulSoup(results, "html.parser")
@@ -67,3 +72,11 @@ def fetch_lyrics(url: str):
             elif content.get("data-exclude-from-selection") != "true":
                 lyrics.append(content.get_text(separator="\n"))
     return "".join(lyrics)
+
+
+def is_allowed_url(url: str) -> bool:
+    parsed = urlparse(url=url)
+    hostname = parsed.hostname
+    return bool(hostname) and any(
+        hostname == d or hostname.endswith("." + d) for d in ALLOWED_DOMAINS
+    )
