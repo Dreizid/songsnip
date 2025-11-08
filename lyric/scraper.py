@@ -51,19 +51,19 @@ def fetch_lyrics(url: str):
         for header in headers:
             header.decompose()
 
-    lyrics = ""
+    lyrics = []
     lyric_container = soup.find_all("div", attrs={"data-lyrics-container": "true"})
     for lyric in lyric_container:
         if not lyric.contents:
-            lyrics += "\n"
+            lyrics.append("\n")
             continue
         for content in lyric.contents:
             if not isinstance(content, (NavigableString, Tag)):
                 raise TypeError("HTML Error")
             if content.name == "br":
-                lyrics += "\n"
+                lyrics.append("\n")
             elif isinstance(content, NavigableString):
-                lyrics += str(content)
+                lyrics.append(str(content))
             elif content.get("data-exclude-from-selection") != "true":
-                lyrics += content.get_text(separator="\n")
-    return lyrics
+                lyrics.append(content.get_text(separator="\n"))
+    return "".join(lyrics)
