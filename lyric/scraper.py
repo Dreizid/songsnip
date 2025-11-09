@@ -14,7 +14,7 @@ TIMEOUT_SECONDS = 20
 
 
 def fetch_songs(query: str):
-    """ "
+    """
     Fetches songs from genius.com based on the query.
 
     Parameters:
