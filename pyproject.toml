@@ -6,10 +6,17 @@ readme = "README.md"
 requires-python = ">=3.11,<3.12"
 dependencies = [
     "beautifulsoup4>=4.14.2",
+    "ctc-forced-aligner",
     "python-dotenv>=1.2.1",
     "requests>=2.32.5",
+    "soundfile>=0.13.1",
+    "torch==2.2.0",
+    "torchaudio==2.2.0",
 ]
 
 [project.optional-dependencies]
-spleeter = ["spleeter>=2.4.2"]
+spleeter = []
 demucs = ["demucs>=4.0.1", "soundfile>=0.13.1"]
+
+[tool.uv.sources]
+ctc-forced-aligner = { git = "https://github.com/MahmoudAshraf97/ctc-forced-aligner.git" }
