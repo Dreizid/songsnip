@@ -11,44 +11,70 @@ from ctc_forced_aligner import (
     preprocess_text,
 )
 
-audio_path = os.path.expanduser("~/mfa_data/firstluv.wav")
-text_path = os.path.expanduser("~/mfa_data/firstluv.txt")
-language = "iso"  # ISO-639-3 Language code
-device = "cuda" if torch.cuda.is_available() else "cpu"
-batch_size = 16
+
+def load_resources(audio_path: str, text_path: str):
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+
+    # Load model
+    alignment_model, alignment_tokenizer = load_alignment_model(
+        device,
+        dtype=torch.float16 if device == "cuda" else torch.float32,
+    )
+
+    # Load audio
+    audio_waveform = load_audio(
+        audio_path, alignment_model.dtype, alignment_model.device
+    )
+
+    # Load lyrics
+    with open(text_path, "r") as f:
+        lines = f.readlines()
+    text = "".join(line for line in lines).replace("\n", " ").strip()
+
+    return alignment_model, alignment_tokenizer, audio_waveform, text
 
 
-alignment_model, alignment_tokenizer = load_alignment_model(
-    device,
-    dtype=torch.float16 if device == "cuda" else torch.float32,
-)
+def prepare_text(text: str, language: str = "iso"):
+    tokens_starred, text_starred = preprocess_text(
+        text,
+        romanize=True,
+        language=language,
+    )
 
-audio_waveform = load_audio(audio_path, alignment_model.dtype, alignment_model.device)
+    return tokens_starred, text_starred
 
 
-with open(text_path, "r") as f:
-    lines = f.readlines()
-text = "".join(line for line in lines).replace("\n", " ").strip()
+def run_model(alignment_model, audio_waveform, batch_size: int = 16):
+    emissions, stride = generate_emissions(
+        alignment_model, audio_waveform, batch_size=batch_size
+    )
 
-emissions, stride = generate_emissions(
-    alignment_model, audio_waveform, batch_size=batch_size
-)
+    return emissions, stride
 
-tokens_starred, text_starred = preprocess_text(
-    text,
-    romanize=True,
-    language=language,
-)
 
-segments, scores, blank_token = get_alignments(
-    emissions,
-    tokens_starred,
-    alignment_tokenizer,
-)
+def align_tokens(emissions, tokens_starred, alignment_tokenizer):
+    segments, scores, blank_token = get_alignments(
+        emissions,
+        tokens_starred,
+        alignment_tokenizer,
+    )
 
-spans = get_spans(tokens_starred, segments, blank_token)
+    spans = get_spans(tokens_starred, segments, blank_token)
 
-word_timestamps = postprocess_results(text_starred, spans, stride, scores)
+    return spans, scores, blank_token
 
-for word in word_timestamps:
-    print(word)
+
+def compute_word_timestamps(text_starred, spans, stride, scores):
+    return postprocess_results(text_starred, spans, stride, scores)
+
+
+def align_audio_text(audio_path: str, text_path: str):
+    model, tokenizer, audio, text = load_resources(
+        audio_path=audio_path, text_path=text_path
+    )
+    tokens_starred, text_starred = prepare_text(text)
+    emissions, stride = run_model(model, audio)
+    spans, scores, blank_token = align_tokens(emissions, tokens_starred, tokenizer)
+    word_timestamps = compute_word_timestamps(text_starred, spans, stride, scores)
+
+    return word_timestamps
