@@ -13,9 +13,9 @@ def convert_to_wav(input_path: str) -> str:
     process = subprocess.run(
         ["ffmpeg", "-i", input_path, "-y", output_path],
         check=True,
-        stdout=subprocess.subprocess.DEVNULL,
-        stderr=subprocess.subprocess.DEVNULL,
-        text=True
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        text=True,
     )
 
     atexit.register(lambda: os.path.exists(output_path) and os.remove(output_path))
