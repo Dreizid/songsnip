@@ -8,9 +8,11 @@ def convert_to_wav(input_path: str) -> str:
     """
     Convert any audio format into .wav format.
     """
+    if not os.path.isfile(input_path):
+        raise FileNotFoundError(f"Input file '{input_path}' does not exist.")
     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmpfile:
         output_path = tmpfile.name
-    process = subprocess.run(
+    subprocess.run(
         ["ffmpeg", "-i", input_path, "-y", output_path],
         check=True,
         stdout=subprocess.DEVNULL,
