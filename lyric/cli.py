@@ -1,21 +1,32 @@
-import sys
-
+import typer
 from scraper import fetch_lyrics, fetch_songs
 
-
-def select_song():
-    print("Song: ", file=sys.stderr, end="")
-    query = input()
-    songs = fetch_songs(query)
-
-    for i, song in enumerate(songs):
-        print(i, ". ", song["title"], file=sys.stderr, end="\n")
-
-    print("Select song: ", file=sys.stderr, end="")
-    song_index = int(input())
-    lyrics = fetch_lyrics(songs[song_index]["url"])
-    print(lyrics)
+app = typer.Typer(help="Lyric related commands")
 
 
-if __name__ == "__main__":
-    select_song()
+@app.command(name="fetch-lyric")
+def select_song(
+    query: str,
+    output: str = typer.Option(None, "--output", "-o", help="File to write results to"),
+):
+    results = fetch_songs(query)
+
+    for i, result in enumerate(results, 1):
+        typer.echo(f"{i}. {result['name']}")
+
+    choice = int(typer.prompt("Pick a number")) - 1
+    if choice >= 0 and choice <= len(results):
+        lyrics = fetch_lyrics(results[choice]["url"])
+
+        if output:
+            with open(output, "w", encoding="utf-8") as f:
+                if lyrics:
+                    f.write(lyrics)
+                    typer.echo(f"Lyrics written to {output}")
+                else:
+                    typer.echo(f"Could not find lyrics for {results[choice]['name']}")
+                    typer.Exit(code=1)
+        else:
+            print(lyrics)
+    else:
+        typer.echo("Invalid choice!")
