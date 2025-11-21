@@ -613,7 +613,7 @@ requires-dist = [
     { name = "torch", specifier = "==2.2.0" },
     { name = "torchaudio", specifier = "==2.2.0" },
 ]
-provides-extras = ["spleeter", "demucs"]
+provides-extras = ["demucs"]
 
 [[package]]
 name = "soundfile"
