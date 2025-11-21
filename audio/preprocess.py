@@ -11,7 +11,7 @@ def convert_to_wav(input_path: str) -> str:
     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmpfile:
         output_path = tmpfile.name
     process = subprocess.run(
-        ["ffmpeg", "-i", input_path, "-y", output_path]
+        ["ffmpeg", "-i", input_path, "-y", output_path],
         check=True,
         stdout=subprocess.subprocess.DEVNULL,
         stderr=subprocess.subprocess.DEVNULL,
