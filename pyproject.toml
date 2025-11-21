@@ -12,6 +12,7 @@ dependencies = [
     "soundfile>=0.13.1",
     "torch==2.2.0",
     "torchaudio==2.2.0",
+    "typer>=0.20.0",
 ]
 
 [project.optional-dependencies]
