@@ -1,5 +1,3 @@
-import os
-
 import torch
 from ctc_forced_aligner import (
     generate_emissions,
