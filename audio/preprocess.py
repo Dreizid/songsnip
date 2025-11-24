@@ -2,6 +2,7 @@ import atexit
 import os
 import subprocess
 import tempfile
+from pathlib import Path
 
 
 def convert_to_wav(input_path: str, verbose: bool = False) -> str:
@@ -10,8 +11,12 @@ def convert_to_wav(input_path: str, verbose: bool = False) -> str:
     """
     if not os.path.isfile(input_path):
         raise FileNotFoundError(f"Input file '{input_path}' does not exist.")
-    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmpfile:
-        output_path = tmpfile.name
+
+    file_name = Path(input_path).stem
+
+    TMPDIR = tempfile.TemporaryDirectory()
+    atexit.register(TMPDIR.cleanup)
+    output_path = str(Path(TMPDIR.name) / f"{file_name}.wav")
 
     if verbose:
         stdout_setting = None
