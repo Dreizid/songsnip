@@ -1,12 +1,12 @@
 from src.core.exceptions import ServiceUnavailableError
 from .exceptions import LyricsNotFoundError, TrackMetadataError
-from src.resolvers.base import TrackMetadata
 from .base import BaseScraper, LyricsData
 from urllib import parse
 import requests
 from requests.exceptions import HTTPError, RequestException
 
 from src.core.types import ResolverType
+from src.core.schema import TrackMetadata
 
 
 class LRCLibScraper(BaseScraper):

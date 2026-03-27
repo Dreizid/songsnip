@@ -1,18 +1,7 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from src.core.schema import TrackMetadata
 
 from src.core.types import ResolverType
-
-
-@dataclass
-class TrackMetadata:
-    title: str
-    artist: str
-    resolver: ResolverType
-    id: int | None = None
-    album: str | None = None
-    duration: int | None = None
-    isrc: str | None = None
 
 
 class BaseResolver(ABC):

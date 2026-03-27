@@ -1,11 +1,13 @@
-from src.core.types import ResolverType
-from .base import BaseResolver, TrackMetadata
-from .exceptions import InvalidQueryError, TooManyRequestError, TrackNotFoundError
 import requests
 from requests.exceptions import HTTPError, RequestException
 from urllib import parse
 
+from .base import BaseResolver
+from .exceptions import InvalidQueryError, TooManyRequestError, TrackNotFoundError
+
 from src.core.exceptions import ServiceUnavailableError
+from src.core.types import ResolverType
+from src.core.schema import TrackMetadata
 
 
 class DeezerResolver(BaseResolver):
