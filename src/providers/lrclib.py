@@ -63,18 +63,14 @@ class LRCLibScraper(BaseScraper):
 
     def _map_to_lyrics(self, data: dict[str, str]) -> LyricsData:
         title = data.get("trackName")
-        artist = data.get("artistName", "Unknown Artist")
         plain_text = data.get("plainLyrics")
         synced_text = data.get("syncedLyrics")
 
         if not title or not plain_text:
-            raise LyricsNotFoundError(
-                f"API returned empty content for title '{title}' by {artist}"
-            )
+            raise LyricsNotFoundError(f"API returned empty content for title '{title}'")
 
         return LyricsData(
             title=title,
-            artist=artist,
             text=plain_text,
             synced_text=synced_text or None,
             source=ResolverType.LRCLIB.value,

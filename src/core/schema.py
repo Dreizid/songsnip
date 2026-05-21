@@ -10,7 +10,6 @@ class LyricsData:
     synced_text: str | None = None
     title: str = ""
     source: str = ""
-    artist: str = ""
 
     @property
     def is_synced(self) -> bool:
