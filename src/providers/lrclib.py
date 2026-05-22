@@ -5,12 +5,13 @@ from urllib import parse
 import requests
 from requests.exceptions import HTTPError, RequestException
 
-from src.core.types import ResolverType
+from src.core.types import ProviderType, ResolverType
 from src.core.schema import TrackMetadata
 
 
 class LRCLibScraper(BaseScraper):
     BASE_URL = "https://lrclib.net"
+    PROVIDER_TYPE = ProviderType.LRCLIB
 
     def fetch(self, track: TrackMetadata):
         if not track or not track.title:
@@ -73,5 +74,5 @@ class LRCLibScraper(BaseScraper):
             title=title,
             text=plain_text,
             synced_text=synced_text or None,
-            source=ResolverType.LRCLIB.value,
+            source=self.PROVIDER_TYPE.value,
         )
