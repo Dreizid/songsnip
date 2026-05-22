@@ -1,7 +1,7 @@
 import sqlite3
 from pathlib import Path
 from src.core.schema import LyricsData, TrackMetadata
-from src.core.types import ResolverType
+from src.core.types import ProviderType
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -22,15 +22,8 @@ class LyricCache:
     def _bootstrap(self) -> None:
         with self._get_connection() as conn:
             conn.execute("""
-                CREATE TABLE IF NOT EXISTS term_map (
-                    term_key TEXT PRIMARY KEY,
-                    track_id TEXT NOT NULL
-                )
-            """)
-
-            conn.execute("""
                 CREATE TABLE IF NOT EXISTS tracks (
-                    track_id TEXT NOT NULL PRIMARY KEY,
+                    track_id TEXT PRIMARY KEY,
                     isrc TEXT,
                     title TEXT NOT NULL,
                     artist TEXT NOT NULL,
@@ -42,14 +35,21 @@ class LyricCache:
             """)
 
             conn.execute("""
+                CREATE TABLE IF NOT EXISTS term_map (
+                    term_key TEXT PRIMARY KEY,
+                    track_id TEXT NOT NULL,
+                    FOREIGN KEY(track_id) REFERENCES tracks(track_id) ON DELETE CASCADE
+                )
+            """)
+
+            conn.execute("""
                 CREATE TABLE IF NOT EXISTS lyrics (
                     track_id TEXT NOT NULL,
-                    isrc TEXT,
                     text TEXT NOT NULL,
                     synced_text TEXT,
                     source TEXT,
                     PRIMARY KEY (track_id, source),
-                    FOREIGN KEY(track_id) REFERENCES tracks(track_id)
+                    FOREIGN KEY(track_id) REFERENCES tracks(track_id) ON DELETE CASCADE
                 )
             """)
 
@@ -57,9 +57,10 @@ class LyricCache:
         with self._get_connection() as conn:
             conn.execute(
                 """
-                INSERT OR REPLACE INTO tracks 
+                INSERT INTO tracks 
                 (track_id, isrc, title, artist, album, duration, resolver_type, resolver_id)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT (track_id) DO NOTHING
             """,
                 (
                     meta.track_id,
@@ -77,9 +78,10 @@ class LyricCache:
         with self._get_connection() as conn:
             conn.execute(
                 """
-                INSERT OR REPLACE INTO lyrics
-                (isrc, text, synced_text, source)
+                INSERT INTO lyrics
+                (track_id, text, synced_text, source)
                 VALUES (?, ?, ?, ?)
+                ON CONFLICT(track_id, source) DO NOTHING
             """,
                 (track_id, lyrics.text, lyrics.synced_text, lyrics.source),
             )
@@ -89,8 +91,9 @@ class LyricCache:
             conn.execute(
                 """
                 INSERT OR REPLACE INTO term_map
-                (term_key, isrc)
+                (term_key, track_id)
                 VALUES (?, ?)
+                ON CONFLICT (term_key) DO NOTHING
             """,
                 (term, track_id),
             )
@@ -131,7 +134,7 @@ class LyricCache:
                 id=row["resolver_id"],
             )
 
-    def get_lyric(self, track_id: str, source: ResolverType) -> LyricsData | None:
+    def get_lyric(self, track_id: str, source: ProviderType) -> LyricsData | None:
         with self._get_connection() as conn:
             row = conn.execute(
                 """
