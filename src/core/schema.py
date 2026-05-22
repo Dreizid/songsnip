@@ -15,6 +15,14 @@ class LyricsData:
     def is_synced(self) -> bool:
         return self.synced_text is not None
 
+    @property
+    def lines(self) -> list[str]:
+        return self.text.splitlines() if self.text else []
+
+    @property
+    def synced_lines(self) -> list[str]:
+        return self.synced_text.splitlines() if self.synced_text else []
+
 
 @dataclass
 class TrackMetadata:
