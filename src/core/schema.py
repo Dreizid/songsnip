@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from .types import ResolverType
+from src.core.types import ResolverType
 
 
 @dataclass

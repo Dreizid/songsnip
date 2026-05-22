@@ -5,9 +5,14 @@ description = "A library used to download, create, and align lyrics to a song wi
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "pytest>=9.0.3",
+    "pytest-mock>=3.15.1",
     "requests>=2.33.0",
 ]
 
 [tool.ruff.format]
 quote-style = "double"
 skip-magic-trailing-comma = false
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
