@@ -1,3 +1,4 @@
+import hashlib
 from dataclasses import dataclass
 from src.core.types import ResolverType
 
@@ -33,3 +34,11 @@ class TrackMetadata:
     album: str | None = None
     duration: int | None = None
     isrc: str | None = None
+
+    @property
+    def track_id(self) -> str:
+        if self.isrc and self.isrc.strip():
+            return self.isrc.strip().upper()
+
+        normalized = f"{self.artist.strip()}|{self.title.strip()}".lower()
+        return hashlib.md5(normalized.encode("utf-8")).hexdigest()

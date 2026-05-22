@@ -1,6 +1,7 @@
 import sqlite3
 from pathlib import Path
 from src.core.schema import LyricsData, TrackMetadata
+from src.core.types import ResolverType
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -23,13 +24,14 @@ class LyricCache:
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS term_map (
                     term_key TEXT PRIMARY KEY,
-                    isrc TEXT NOT NULL
+                    track_id TEXT NOT NULL
                 )
             """)
 
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS tracks (
-                    isrc TEXT PRIMARY KEY,
+                    track_id TEXT NOT NULL PRIMARY KEY,
+                    isrc TEXT,
                     title TEXT NOT NULL,
                     artist TEXT NOT NULL,
                     album TEXT,
@@ -41,12 +43,13 @@ class LyricCache:
 
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS lyrics (
+                    track_id TEXT NOT NULL,
                     isrc TEXT,
                     text TEXT NOT NULL,
                     synced_text TEXT,
                     source TEXT,
-                    PRIMARY KEY (isrc, source),
-                    FOREIGN KEY(isrc) REFERENCES tracks(isrc)
+                    PRIMARY KEY (track_id, source),
+                    FOREIGN KEY(track_id) REFERENCES tracks(track_id)
                 )
             """)
 
@@ -55,10 +58,11 @@ class LyricCache:
             conn.execute(
                 """
                 INSERT OR REPLACE INTO tracks 
-                (isrc, title, artist, album, duration, resolver_type, resolver_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                (track_id, isrc, title, artist, album, duration, resolver_type, resolver_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
                 (
+                    meta.track_id,
                     meta.isrc,
                     meta.title,
                     meta.artist,
@@ -69,7 +73,7 @@ class LyricCache:
                 ),
             )
 
-    def save_lyric(self, isrc: str, lyrics: LyricsData) -> None:
+    def save_lyric(self, track_id: str, lyrics: LyricsData) -> None:
         with self._get_connection() as conn:
             conn.execute(
                 """
@@ -77,10 +81,10 @@ class LyricCache:
                 (isrc, text, synced_text, source)
                 VALUES (?, ?, ?, ?)
             """,
-                (isrc, lyrics.text, lyrics.synced_text, lyrics.source),
+                (track_id, lyrics.text, lyrics.synced_text, lyrics.source),
             )
 
-    def save_term(self, term: str, isrc: str) -> None:
+    def save_term(self, term: str, track_id: str) -> None:
         with self._get_connection() as conn:
             conn.execute(
                 """
@@ -88,14 +92,14 @@ class LyricCache:
                 (term_key, isrc)
                 VALUES (?, ?)
             """,
-                (term, isrc),
+                (term, track_id),
             )
 
-    def get_isrc_by_term(self, term: str) -> str | None:
+    def get_track_id_by_term(self, term: str) -> str | None:
         with self._get_connection() as conn:
             row = conn.execute(
                 """
-                SELECT isrc FROM term_map WHERE term_key = ?
+                SELECT track_id FROM term_map WHERE term_key = ?
                 """,
                 (term,),
             ).fetchone()
@@ -103,15 +107,15 @@ class LyricCache:
             if not row:
                 return None
 
-            return row["isrc"]
+            return row["track_id"]
 
-    def get_track(self, isrc: str) -> TrackMetadata | None:
+    def get_track(self, track_id: str) -> TrackMetadata | None:
         with self._get_connection() as conn:
             row = conn.execute(
                 """
-                SELECT * FROM tracks WHERE isrc = ?
+                SELECT * FROM tracks WHERE track_id = ?
                 """,
-                (isrc,),
+                (track_id,),
             ).fetchone()
 
             if not row:
@@ -127,13 +131,13 @@ class LyricCache:
                 id=row["resolver_id"],
             )
 
-    def get_lyric(self, isrc: str) -> LyricsData | None:
+    def get_lyric(self, track_id: str, source: ResolverType) -> LyricsData | None:
         with self._get_connection() as conn:
             row = conn.execute(
                 """
-                SELECT * FROM lyrics WHERE isrc = ? LIMIT 1
+                SELECT * FROM lyrics WHERE track_id = ? AND source = ? LIMIT 1
                 """,
-                (isrc,),
+                (track_id, source),
             ).fetchone()
 
             if not row:
