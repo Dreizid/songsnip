@@ -1,4 +1,4 @@
-from src.core.storage import LyricCache
+from src.cache.lyrics import LyricCache
 from src.resolvers.base import BaseResolver
 from src.providers.base import BaseScraper
 
