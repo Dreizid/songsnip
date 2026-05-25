@@ -5,9 +5,12 @@ description = "A library used to download, create, and align lyrics to a song wi
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "demucs>=4.0.1",
+    "platformdirs>=4.9.6",
     "pytest>=9.0.3",
     "pytest-mock>=3.15.1",
     "requests>=2.33.0",
+    "torchcodec>=0.13.0",
 ]
 
 [tool.ruff.format]
